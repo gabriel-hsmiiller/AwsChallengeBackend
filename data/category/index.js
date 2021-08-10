@@ -6,7 +6,7 @@ let categoryDB = function(category) {
 }
 
 categoryDB.getAll = (callback) => {
-    const query = fs.readFileSync('./SELECT_ALL.sql').toString();
+    const query = `SELECT * FROM awschallenge.category`;
 
     sql.query(query, (err, res) => {
         if(err){
@@ -18,7 +18,7 @@ categoryDB.getAll = (callback) => {
 }
 
 categoryDB.getById = (id, callback) => {
-    const query = fs.readFileSync('./SELECT_BY_ID.sql').toString();
+    const query = `SELECT * FROM awschallenge.category WHERE Id = ?`;
 
     if(!id){
         callback('[ERROR]: No `id` parameter has been provided.');
@@ -29,20 +29,20 @@ categoryDB.getById = (id, callback) => {
         if(err){
             callback(err);
         } else {
-            callback(null,res);
+            callback(null,res[0]);
         }
     });
 }
 
 categoryDB.post = (category, callback) => {
-    const query = fs.readFileSync('./INSERT.sql').toString();
+    const query = `INSERT INTO category SET ?`;
 
     if(!category || !(category.Name)){
         callback('[ERROR]: `category` parameter is invalid.');
         return;
     }
 
-    sql.query(query, [category.Name], (err, res) => {
+    sql.query(query, category, (err, res) => {
         if(err){
             callback(err);
         } else {
@@ -52,20 +52,32 @@ categoryDB.post = (category, callback) => {
 }
 
 categoryDB.delete = (id, callback) => {
-    const query = fs.readFileSync('./DELETE.sql').toString();
+    const queryCheck = `SELECT * FROM device WHERE Category = ?`;
+    const queryDelete = `DELETE FROM category WHERE Id = ?`;
 
     if(!id){
         callback('[ERROR]: No `id` parameter has been provided.');
         return;
     }
 
-    sql.query(query, id, (err, res) => {
+    sql.query(queryCheck, id, (err,res) => {
         if(err){
             callback(err);
         } else {
-            callback(null,res);
+            if(res.length > 0){
+                callback(`[ERROR]: Cannot delete category id \`${id}\`: one or more rows references category on database[device]`)
+            } else {
+                sql.query(queryDelete, id, (err, res) => {
+                    if(err){
+                        callback(err);
+                    } else {
+                        callback(null,res);
+                    }
+                });
+            }
         }
     });
+
 }
 
 module.exports = categoryDB;
