@@ -45,10 +45,31 @@ device.get('/:id', (req, res, next) => {
 device.post('/', (req, res, next) => {
     const { device } = req.body;
 
+    if(!device){
+        res.status(400).send({
+            message: 'Data not provided.'
+        });
+        return;
+    }
+    
+    if(/[0-9]+/gm.test(device.Color)){
+        res.status(406).send({
+            message: '`Color` cannot contain numbers.'
+        });
+        return;
+    }
+    
+    if(Math.abs(Number(device.PartNumber)) !== Number(device.PartNumber)){
+        res.status(406).send({
+            message: '`PartNumber` must be positive'
+        });
+        return;
+    }
+
     db.post(device, (error,success) => {
         if(error){
             res.status(500).send({
-                message: error
+                message: error.sqlMessage
             });
         } else {
             const content = { ...device, Id: success.insertId };
@@ -66,6 +87,13 @@ device.post('/', (req, res, next) => {
 
 device.delete('/:id', (req, res, next) => {
     const { id } = req.params;
+
+    if(!id){
+        res.status(400).send({
+            message: 'ID not provided.'
+        });
+        return;
+    }
 
     db.delete(id, (error, success) => {
         if(error){
