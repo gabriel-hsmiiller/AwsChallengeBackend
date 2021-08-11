@@ -70,7 +70,7 @@ describe('routes/device.router.js', () => {
         });
 
         it('should not register new device when post / with incorrect parameters', (done) => {
-            device.Color = '0';
+            device.Color = '0'.repeat(17);
             device.PartNumber = -1;
     
             request.post(`${baseUrl}/device`, { body: { device }, json: true }, (err, res, body) => {

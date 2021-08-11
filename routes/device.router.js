@@ -68,6 +68,13 @@ device.post('/', (req, res, next) => {
         });
         return;
     }
+
+    if(device.Color.length > 16){
+        res.status(406).send({
+            message: '`Color` length is too long.'
+        });
+        return;
+    }
     
     if(Math.abs(Number(device.PartNumber)) !== Number(device.PartNumber)){
         res.status(406).send({
