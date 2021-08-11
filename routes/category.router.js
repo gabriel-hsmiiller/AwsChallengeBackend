@@ -30,13 +30,23 @@ category.get('/:id', (req, res, next) => {
                 message: error
             });
         } else {
-            res.json({
-                message: 'Ok',
-                data: {
-                    total: success ? 1 : 0,
-                    content: success ?? null
-                }
-            });
+            if(!success){
+                res.status(404).json({
+                    message: 'Not found',
+                    data: {
+                        total: 0,
+                        content: null
+                    }
+                });
+            } else {
+                res.json({
+                    message: 'Ok',
+                    data: {
+                        total: success ? 1 : 0,
+                        content: success ?? null
+                    }
+                });
+            }
         }
         next();
     });
@@ -96,10 +106,10 @@ category.delete('/:id', (req, res, next) => {
                 message: error
             });
         } else {
-            res.status(204).json({
-                message: 'Deleted',
+            res.status(200).json({
+                message: success.affectedRows > 0 ? 'Deleted' : 'No content',
                 data: {
-                    total: 1,
+                    total: success.affectedRows,
                     content: success
                 }
             });
